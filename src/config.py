@@ -18,6 +18,8 @@ DEBUG = True
 # Hugging Face
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"
-TEMPERATURE = 0.3
+MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.3"
+
+TEMPERATURE = 0.2
+
 MAX_NEW_TOKENS = 512

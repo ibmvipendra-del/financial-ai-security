@@ -70,3 +70,15 @@ def net_worth(
     worth = total_assets - total_liabilities
 
     return f"Net Worth: ₹{worth:,.2f}"
+
+# ==========================================================
+# Tool Registry
+# ==========================================================
+
+TOOL_REGISTRY = {
+    "emergency_fund": emergency_fund,
+    "sip_calculator": sip_calculator,
+    "emi_calculator": emi_calculator,
+    "net_worth": net_worth,
+    "savings_rate": savings_rate,
+}
