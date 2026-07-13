@@ -8,20 +8,28 @@ from src.planner import Planner
 
 planner = Planner()
 
-print("=" * 60)
+questions = [
 
-plan = planner.create_plan(
-    "My monthly expense is 80000. How much emergency fund should I keep?"
-)
+    "My monthly expense is 80000. Calculate emergency fund.",
 
-print(plan)
+    "My salary is 120000 and expense is 60000. Calculate savings rate.",
 
-print("=" * 60)
+    "SIP 10000 at 12 percent for 20 years.",
 
-plan = planner.create_plan(
+    "EMI for 5000000 loan at 8.5 percent for 20 years.",
+
+    "My assets are 8000000 and liabilities are 2500000. Calculate net worth.",
+
     "Hello"
-)
 
-print(plan)
+]
 
 print("=" * 60)
+
+for q in questions:
+
+    print(q)
+
+    print(planner.create_plan(q))
+
+    print("-" * 60)

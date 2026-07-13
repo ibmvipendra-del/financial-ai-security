@@ -1,106 +1,79 @@
 from typing import TypedDict
-import re
 
 from langgraph.graph import StateGraph, END
 
-from src.tools import TOOL_REGISTRY
-from src.llm import DummyLLM
+from src.planner import Planner
+from src.executor import ToolExecutor
+from src.security_validator import SecurityValidator
+from src.llm_factory import LLMFactory
 
-llm = DummyLLM()
+
+planner = Planner()
+executor = ToolExecutor()
+validator = SecurityValidator()
+llm = LLMFactory.create()
 
 
-class AgentState(TypedDict):
+class AgentState(TypedDict, total=False):
     question: str
+    plan: dict
     answer: str
 
 
-# -------------------------
-# Router
-# -------------------------
+# --------------------------------------------------
+# Planner Node
+# --------------------------------------------------
+def planner_node(state: AgentState):
 
-def router(state: AgentState):
-
-    question = state["question"].lower()
-
-    if "emergency" in question:
-        return "tool"
-
-    return "chat"
-
-
-# -------------------------
-# Helper
-# -------------------------
-
-def extract_amount(question: str):
-
-    numbers = re.findall(r"\d+", question)
-
-    if numbers:
-        return float(numbers[0])
-
-    return 50000
-
-
-# -------------------------
-# Tool Node
-# -------------------------
-
-def tool_node(state: AgentState):
-
-    expense = extract_amount(state["question"])
-
-    tool = TOOL_REGISTRY["emergency_fund"]
-
-    result = tool.invoke(
-        {
-            "monthly_expense": expense
-        }
-    )
+    plan = planner.create_plan(state["question"])
 
     return {
         "question": state["question"],
+        "plan": plan,
+    }
+
+
+# --------------------------------------------------
+# Security Node
+# --------------------------------------------------
+def security_node(state: AgentState):
+
+    validator.validate(state["plan"])
+
+    return state
+
+
+# --------------------------------------------------
+# Execution Node
+# --------------------------------------------------
+def execution_node(state: AgentState):
+
+    result = executor.execute(state["plan"])
+
+    if result is None:
+        result = llm.invoke(state["question"])
+
+    return {
+        "question": state["question"],
+        "plan": state["plan"],
         "answer": result,
     }
 
 
-# -------------------------
-# Chat Node
-# -------------------------
-
-def chat_node(state: AgentState):
-
-    response = llm.invoke(
-        state["question"]
-    )
-
-    return {
-        "question": state["question"],
-        "answer": response
-    }
-
+# --------------------------------------------------
+# Build Graph
+# --------------------------------------------------
 
 builder = StateGraph(AgentState)
 
-builder.add_node(
-    "tool",
-    tool_node
-)
+builder.add_node("planner", planner_node)
+builder.add_node("security", security_node)
+builder.add_node("execution", execution_node)
 
-builder.add_node(
-    "chat",
-    chat_node
-)
+builder.set_entry_point("planner")
 
-builder.set_conditional_entry_point(
-    router,
-    {
-        "tool": "tool",
-        "chat": "chat"
-    }
-)
-
-builder.add_edge("tool", END)
-builder.add_edge("chat", END)
+builder.add_edge("planner", "security")
+builder.add_edge("security", "execution")
+builder.add_edge("execution", END)
 
 graph = builder.compile()
