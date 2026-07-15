@@ -1,10 +1,10 @@
+import time
+
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     pipeline,
 )
-
-from langchain_huggingface import HuggingFacePipeline
 
 from src import config
 
@@ -17,45 +17,87 @@ class HuggingFaceLLM:
         print("Loading HuggingFace Model...")
         print("=" * 60)
 
-        tokenizer = AutoTokenizer.from_pretrained(
+        self.tokenizer = AutoTokenizer.from_pretrained(
             config.MODEL_NAME,
             token=config.HF_TOKEN,
         )
 
-        model = AutoModelForCausalLM.from_pretrained(
+        self.model = AutoModelForCausalLM.from_pretrained(
             config.MODEL_NAME,
             token=config.HF_TOKEN,
             device_map="cpu",
+            torch_dtype="auto",
         )
 
-        pipe = pipeline(
+        self.pipe = pipeline(
             task="text-generation",
-            model=model,
-            tokenizer=tokenizer,
+            model=self.model,
+            tokenizer=self.tokenizer,
+        )
+
+    def invoke(self, question: str):
+
+        messages = [
+
+            {
+                "role": "system",
+                "content": (
+                    "You are a helpful financial advisor. "
+                    "Answer accurately and briefly."
+                ),
+            },
+
+            {
+                "role": "user",
+                "content": question,
+            },
+
+        ]
+
+        prompt = self.tokenizer.apply_chat_template(
+
+            messages,
+
+            tokenize=False,
+
+            add_generation_prompt=True,
+
+        )
+
+        start = time.time()
+
+        response = self.pipe(
+
+            prompt,
+
             max_new_tokens=config.MAX_NEW_TOKENS,
+
             temperature=config.TEMPERATURE,
-            do_sample=True,
+
+            do_sample=False,
+
             return_full_text=False,
+
+            clean_up_tokenization_spaces=False,
+
         )
 
-        self.llm = HuggingFacePipeline(
-            pipeline=pipe
-        )
+        elapsed = time.time() - start
 
-    def invoke(self, prompt: str):
+        print(f"LLM Time: {elapsed:.2f} seconds")
 
-        return self.llm.invoke(prompt)
+        return response[0]["generated_text"].strip()
 
 
 class DummyLLM:
 
-    def invoke(self, prompt: str):
+    def invoke(self, question: str):
 
         return f"""
 [Financial AI]
 
 Question:
-{prompt}
+{question}
 
 Dummy response.
 """

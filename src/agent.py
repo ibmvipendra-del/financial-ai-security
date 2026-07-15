@@ -1,33 +1,35 @@
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-
 from src.graph import graph
+from src.security_pipeline import SecurityPipeline
 
 
-print("=" * 60)
-print("Emergency Fund Test")
-print("=" * 60)
+class FinancialAIAgent:
 
-response = graph.invoke(
-    {
-        "question": "My monthly expense is 80000. How much emergency fund should I keep?"
-    }
-)
+    def __init__(self):
 
-print(response["answer"])
+        self.security = SecurityPipeline()
 
+    def invoke(self, question: str):
 
-print("\n" + "=" * 60)
-print("General Chat Test")
-print("=" * 60)
+        security_result = self.security.scan(question)
 
-response = graph.invoke(
-    {
-        "question": "Hello"
-    }
-)
+        if not security_result["safe"]:
 
-print(response["answer"])
+            return {
+
+                "question": question,
+
+                "answer": "Request blocked by AI Security Pipeline.",
+
+                "security": security_result,
+
+            }
+
+        response = graph.invoke(
+            {
+                "question": question
+            }
+        )
+
+        response["security"] = security_result
+
+        return response

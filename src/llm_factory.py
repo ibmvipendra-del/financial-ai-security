@@ -2,7 +2,7 @@ from src.llm import DummyLLM
 from src.llm import HuggingFaceLLM
 
 
-USE_REAL_MODEL = False
+USE_REAL_MODEL = True
 
 
 class LLMFactory:
@@ -14,4 +14,8 @@ class LLMFactory:
 
             return HuggingFaceLLM()
 
-        return HuggingFaceLLM()
+        return DummyLLM()
+    
+
+
+    
