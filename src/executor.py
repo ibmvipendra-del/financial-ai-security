@@ -1,26 +1,35 @@
 from src.tools import TOOL_REGISTRY
 
 
-class ToolExecutor:
-    """
-    Executes the tool selected by the planner.
-    """
+class Executor:
 
     def execute(self, plan: dict):
 
-        tool_name = plan.get("tool")
-        arguments = plan.get("arguments", {})
+        tool_name = plan["tool"]
 
-        # Chat requests don't need a tool
         if tool_name == "chat":
-            return None
 
-        # Allow only registered tools
-        if tool_name not in TOOL_REGISTRY:
+            return {
+                "tool_result": None,
+                "answer": None,
+            }
+
+        tool = TOOL_REGISTRY.get(tool_name)
+
+        if tool is None:
+
             raise ValueError(
-                f"Unauthorized tool requested: {tool_name}"
+                f"Unknown tool: {tool_name}"
             )
 
-        tool = TOOL_REGISTRY[tool_name]
+        result = tool.invoke(
+            plan["arguments"]
+        )
 
-        return tool.invoke(arguments)
+        return {
+
+            "tool_result": result,
+
+            "answer": result,
+
+        }

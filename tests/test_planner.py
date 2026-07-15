@@ -16,20 +16,20 @@ questions = [
 
     "SIP 10000 at 12 percent for 20 years.",
 
-    "EMI for 5000000 loan at 8.5 percent for 20 years.",
+    "EMI for 5000000 loan at 8 percent for 20 years.",
 
     "My assets are 8000000 and liabilities are 2500000. Calculate net worth.",
 
-    "Hello"
+    "Hello",
 
 ]
 
-print("=" * 60)
+print("=" * 70)
 
 for q in questions:
 
     print(q)
 
-    print(planner.create_plan(q))
+    print(planner.plan(q))
 
-    print("-" * 60)
+    print("-" * 70)

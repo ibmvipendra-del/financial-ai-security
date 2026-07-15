@@ -1,24 +1,30 @@
-import json
 import re
 
 
 class Planner:
-
     """
-    Rule-based planner.
+    Planner.
 
-    Next sprint this will become
-    a real LLM planner without
-    changing Graph or Executor.
+    Current implementation:
+        Rule-based planner.
+
+    Future implementation:
+        LLM-based planner.
+
+    The rest of the application will always call:
+
+        planner.plan(question)
+
+    regardless of implementation.
     """
 
-    def create_plan(self, question: str):
+    def plan(self, question: str):
 
         question_lower = question.lower()
 
-        # ---------------------------------------
+        # ------------------------------------------------
         # Emergency Fund
-        # ---------------------------------------
+        # ------------------------------------------------
 
         if "emergency" in question_lower:
 
@@ -31,9 +37,9 @@ class Planner:
                 }
             }
 
-        # ---------------------------------------
+        # ------------------------------------------------
         # Savings Rate
-        # ---------------------------------------
+        # ------------------------------------------------
 
         if "saving" in question_lower:
 
@@ -45,13 +51,13 @@ class Planner:
                     "tool": "savings_rate",
                     "arguments": {
                         "monthly_income": numbers[0],
-                        "monthly_expense": numbers[1]
-                    }
+                        "monthly_expense": numbers[1],
+                    },
                 }
 
-        # ---------------------------------------
+        # ------------------------------------------------
         # SIP
-        # ---------------------------------------
+        # ------------------------------------------------
 
         if "sip" in question_lower:
 
@@ -64,13 +70,13 @@ class Planner:
                     "arguments": {
                         "monthly_investment": numbers[0],
                         "annual_return": numbers[1],
-                        "years": int(numbers[2])
-                    }
+                        "years": int(numbers[2]),
+                    },
                 }
 
-        # ---------------------------------------
+        # ------------------------------------------------
         # EMI
-        # ---------------------------------------
+        # ------------------------------------------------
 
         if "emi" in question_lower:
 
@@ -83,13 +89,13 @@ class Planner:
                     "arguments": {
                         "loan_amount": numbers[0],
                         "annual_rate": numbers[1],
-                        "years": int(numbers[2])
-                    }
+                        "years": int(numbers[2]),
+                    },
                 }
 
-        # ---------------------------------------
+        # ------------------------------------------------
         # Net Worth
-        # ---------------------------------------
+        # ------------------------------------------------
 
         if "net worth" in question_lower:
 
@@ -101,18 +107,23 @@ class Planner:
                     "tool": "net_worth",
                     "arguments": {
                         "total_assets": numbers[0],
-                        "total_liabilities": numbers[1]
-                    }
+                        "total_liabilities": numbers[1],
+                    },
                 }
+
+        # ------------------------------------------------
+        # Default
+        # ------------------------------------------------
 
         return {
             "tool": "chat",
-            "arguments": {}
+            "arguments": {},
         }
 
-    # ---------------------------------------
+    # ------------------------------------------------
 
-    def extract_number(self, text):
+    @staticmethod
+    def extract_number(text: str):
 
         nums = re.findall(r"\d+(?:\.\d+)?", text)
 
@@ -122,10 +133,11 @@ class Planner:
 
         return 50000
 
-    # ---------------------------------------
+    # ------------------------------------------------
 
-    def extract_numbers(self, text):
+    @staticmethod
+    def extract_numbers(text: str):
 
-        nums = re.findall(r"\d+", text)
+        nums = re.findall(r"\d+(?:\.\d+)?", text)
 
         return [float(x) for x in nums]
