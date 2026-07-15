@@ -1,72 +1,24 @@
-import re
-
-from src.risk_engine import RiskEngine
+from src.base_detector import BaseDetector
 
 
-class PromptInjectionDetector:
-    """
-    Detect Prompt Injection attacks before
-    they reach the LLM.
-    """
+class PromptInjectionDetector(BaseDetector):
 
-    def __init__(self):
+    DETECTOR_NAME = "Prompt Injection"
 
-        self.risk_engine = RiskEngine()
+    RULES = [
 
-        self.patterns = [
+        (r"ignore\s+previous", 30),
 
-            # Prompt Manipulation
-            r"ignore\s+previous",
-            r"ignore\s+all",
-            r"ignore\s+instructions",
-            r"forget\s+previous",
-            r"override",
+        (r"system\s+prompt", 35),
 
-            # Prompt Leakage
-            r"system\s+prompt",
-            r"developer\s+message",
-            r"reveal\s+prompt",
-            r"show\s+prompt",
-            r"print\s+prompt",
+        (r"api\s*key", 40),
 
-            # Secrets
-            r"api\s*key",
-            r"password",
-            r"secret",
+        (r"delete\s+database", 50),
 
-            # Dangerous Commands
-            r"delete\s+database",
-            r"shutdown",
-            r"sudo",
-            r"rm\s+-rf",
+        (r"developer\s+mode", 40),
 
-            # Security Bypass
-            r"disable\s+security",
-            r"bypass",
-        ]
+        (r"reveal\s+instructions", 35),
 
-    def scan(self, prompt: str):
+        (r"bypass\s+safety", 40),
 
-        text = prompt.lower()
-
-        findings = []
-
-        for pattern in self.patterns:
-
-            if re.search(pattern, text):
-
-                findings.append(pattern)
-
-        risk = self.risk_engine.calculate(findings)
-
-        return {
-
-            "safe": len(findings) == 0,
-
-            "matches": findings,
-
-            "score": risk["score"],
-
-            "risk": risk["level"],
-
-        }
+    ]
