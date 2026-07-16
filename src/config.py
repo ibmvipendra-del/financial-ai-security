@@ -19,4 +19,4 @@ MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
 TEMPERATURE = 0.2
 
-MAX_NEW_TOKENS = 64
+MAX_NEW_TOKENS = 32

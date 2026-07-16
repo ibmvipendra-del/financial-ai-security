@@ -4,43 +4,65 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from src.ground_truth import GroundTruth
 from src.hallucination_detector import HallucinationDetector
+
 
 detector = HallucinationDetector()
 
+
+ground_truth = GroundTruth(
+
+    tool="emergency_fund",
+
+    text="Recommended Emergency Fund (6 months): ₹480,000.00",
+
+    values={
+
+        "emergency_fund":480000
+
+    }
+
+)
+
+
 cases = [
 
-    (
-        "Recommended Emergency Fund (6 months): ₹480,000.00",
-        "You should maintain an emergency fund of ₹480,000."
-    ),
+    "You should maintain an emergency fund of ₹480,000.00.",
 
-    (
-        "Recommended Emergency Fund (6 months): ₹480,000.00",
-        "You should maintain an emergency fund of ₹600,000."
-    ),
+    "You should maintain an emergency fund of ₹600,000.",
 
-    (
-        "Recommended Emergency Fund (6 months): ₹480,000.00",
-        ""
-    ),
+    "",
 
 ]
 
+
 print("=" * 80)
 
-for tool_result, llm_response in cases:
+for response in cases:
 
-    print("Tool Result:")
-    print(tool_result)
+    print("Ground Truth:")
+
+    print(ground_truth)
 
     print()
 
     print("LLM Response:")
-    print(llm_response)
+
+    print(response)
 
     print()
 
-    print(detector.scan(tool_result, llm_response))
+    print(
+
+        detector.scan(
+
+            ground_truth,
+
+            response,
+
+        )
+
+    )
 
     print("-" * 80)

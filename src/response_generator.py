@@ -1,4 +1,5 @@
 from src.llm_factory import LLMFactory
+from src.ground_truth import GroundTruth
 
 
 class ResponseGenerator:
@@ -13,7 +14,7 @@ class ResponseGenerator:
 
         question: str,
 
-        tool_result: str,
+        ground_truth: GroundTruth,
 
     ):
 
@@ -22,17 +23,21 @@ You are a professional financial advisor.
 
 The financial calculation has already been performed.
 
-Do NOT recalculate anything.
+DO NOT perform any calculations.
 
-Explain the result in simple language.
+DO NOT modify any financial values.
+
+Use the verified calculation exactly as provided.
 
 Question:
 
 {question}
 
-Calculation Result:
+Verified Financial Result:
 
-{tool_result}
+{ground_truth.text}
+
+Explain this result in simple language.
 
 Professional Explanation:
 """

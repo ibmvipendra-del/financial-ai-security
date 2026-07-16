@@ -1,77 +1,70 @@
 import re
 
+from src.ground_truth import GroundTruth
+
 
 class HallucinationDetector:
 
-    def extract_currency_values(self, text: str):
+    """
+    Validates that the LLM preserved
+    trusted business values.
+    """
 
-        """
-        Extract only monetary values.
+    def scan(
 
-        Ignore things like:
-        6 months
-        20 years
-        12 percent
-        """
+        self,
 
-        matches = re.findall(
-            r"₹?\s*([\d,]+(?:\.\d+)?)",
-            text,
-        )
+        ground_truth: GroundTruth,
 
-        values = []
+        llm_response: str,
 
-        for value in matches:
-
-            value = value.replace(",", "")
-
-            try:
-
-                values.append(float(value))
-
-            except ValueError:
-
-                pass
-
-        return values
-
-    # -----------------------------------------------------
-
-    def scan(self, tool_result: str, llm_response: str):
+    ):
 
         findings = []
 
         score = 0
 
-        tool_values = self.extract_currency_values(tool_result)
+        if not llm_response.strip():
 
-        response_values = self.extract_currency_values(llm_response)
+            findings.append(
 
-        # ---------------------------------------------
+                "LLM returned an empty response."
 
-        if len(llm_response.strip()) == 0:
-
-            findings.append("LLM returned an empty response.")
+            )
 
             score += 100
 
-        # ---------------------------------------------
+        # --------------------------------------
+        # Validate every trusted value
+        # --------------------------------------
 
-        for value in tool_values:
+        for field, expected in ground_truth.values.items():
 
-            found = any(abs(value - x) < 0.01 for x in response_values)
+            expected_text = f"{expected:,.2f}"
 
-            if not found:
+            expected_plain = str(int(expected))
+
+            if (
+
+                expected_text not in llm_response
+
+                and expected_plain not in llm_response
+
+            ):
 
                 findings.append(
 
-                    f"Expected value {value:,.2f} missing."
+                    f"{field} expected "
+
+                    f"{expected_text} "
+
+                    "not found."
 
                 )
 
-                score += 60
+                score += 100
 
-        # ---------------------------------------------
+        # --------------------------------------
 
         if score >= 100:
 

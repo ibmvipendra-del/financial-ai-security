@@ -72,8 +72,6 @@ class HuggingFaceLLM:
 
             max_new_tokens=config.MAX_NEW_TOKENS,
 
-            temperature=config.TEMPERATURE,
-
             do_sample=False,
 
             return_full_text=False,
