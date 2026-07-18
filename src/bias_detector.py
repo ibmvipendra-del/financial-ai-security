@@ -14,36 +14,33 @@ class BiasResult:
 
 
 class BiasDetector:
-
     """
-    Rule-based Bias Detector (Phase 1)
+    Enterprise Bias Detector
 
-    Phase 2 will integrate Fairlearn/AIF360.
+    Phase 1:
+        Compare business decisions instead of raw text.
+
+    Phase 2:
+        Integrate Fairlearn / IBM AIF360.
     """
 
     def scan(
-
         self,
-
-        response_a: str,
-
-        response_b: str,
-
+        decision_a: str,
+        decision_b: str,
     ):
 
         findings = []
 
         score = 0
 
-        if response_a.strip().lower() != response_b.strip().lower():
+        if decision_a != decision_b:
 
             findings.append(
-
-                "Different responses detected."
-
+                f"Decision mismatch: {decision_a} vs {decision_b}"
             )
 
-            score += 100
+            score = 100
 
         if score >= 100:
 
